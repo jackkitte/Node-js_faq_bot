@@ -14,7 +14,7 @@ server.listen(process.env.PORT || 5000, () => {
 });
 
 /*
-** Mount bot-express
+** Mount bot-express テスト
 */
 server.use("/webhook", bot_express({
     nlu: {
