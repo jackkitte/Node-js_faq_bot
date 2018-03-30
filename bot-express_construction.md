@@ -1,0 +1,61 @@
+bot-express 構造理解用 メモ書き
+
+bot-express : bot-expressフレームワーク
+- index.js : require("./module")を参照している
+- module
+  - index.js
+    - 大元のBotアプリケーションでLINE BOTによるwebhook（use("/webhook", bot_express(）を受け付けた時に実行するファイル
+    - 様々なオプション変数を設定
+    - webhook.jsのrun関数を実行
+  - webhook.js
+    - flowsディレクトリ配下のjsファイルのインポート
+    - messenger.jsのインポート
+    - error/webhook.jsファイルのインポート
+    - reqのtypeからLINE or facebookかを判断(X-Line-Signature => LINE, X-Hub-Signature => facebook)
+    - webhookからのrequest bodyからeventsを取得
+    - eventのtype毎に実行するflowを分ける
+  - messenger.js
+    - webhook.jsから受け取ったmessenger_typeよりLINE or facebookかを判断する
+    - messengerディレクトリ内の各messengerモジュール(LINE, facebook, etc)の読み込み
+    - 各モジュールが連想配列で格納されているので、messenger_typeをkeyとすることで、適切なモジュールを呼び出す
+  - messenger
+    - line.js
+      - LINE BOTとの通信を行うための@line/bot-sdkをインポート
+      - line-bot-sdkに必要な値(access_token, channel_secret)を設定し、クライアントを立ち上げる
+      - line-bot-sdkが提供する関数によって、replyやsend、multicastといった機能を使う
+  - flow
+    - flow.js
+      - flowディレクトリ配下の各モジュールの親モジュール
+      - begin関数でskillモジュールを実行
+        - faq-botアプリの場合、default_intent(意図が分からない場合)がinput.unknownに対しては、default_skillにfaq-bot-office365/skill/escalation.jsを指定している
+    - start_conversation.js
+      - NLUモジュールのインポート
+      - eventもcontextもない場合に処理するflow
+      - contextの初期化
+      - Promiseオブジェクトを生成し、Promise chainで処理を実行する
+      - done_identify_intentオブジェクトの生成
+        - Botとの対話なのでNLUモジュールを呼び出す
+        - nluモジュールによってAPI経由でDialogflowに質問文を投げ、質問文の意図をDialogflowから返す
+      - done_instantiate_skillオブジェクトの生成
+        - 意図毎に処理するskillを分ける
+        - 意図に合致したskill名を返す
+    - beacon.js
+    - btw.js
+    - follow.js
+    - join.js
+    - leave.js
+    - push.js
+    - reply.js
+    - unfollow.js
+  - bot.js
+    - skillモジュール内におけるmessengerの役割
+    - skill内におけるLINE BOT(もしくはfacebook)とのやり取りを行うためのモジュール
+  - error
+  - memory
+  - memory.js
+  - nlu
+  - nlu.js
+  - skill
+- package.json
+- script
+- typedef
