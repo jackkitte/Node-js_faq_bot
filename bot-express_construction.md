@@ -13,7 +13,9 @@ bot-express : bot-expressフレームワーク
     - error/webhook.jsファイルのインポート
     - reqのtypeからLINE or facebookかを判断(X-Line-Signature => LINE, X-Hub-Signature => facebook)
     - webhookからのrequest bodyからeventsを取得
+    - 誰から(sender_id, to_id, etc)発信した情報かを見分けるためにmemory_idを設定(extract_sender_idで取得)
     - eventのtype毎に実行するflowを分ける
+      - typeがどれにも一致しない場合は、contextがあるかないかでflowを分ける
   - messenger.js
     - webhook.jsから受け取ったmessenger_typeよりLINE or facebookかを判断する
     - messengerディレクトリ内の各messengerモジュール(LINE, facebook, etc)の読み込み
@@ -23,6 +25,21 @@ bot-express : bot-expressフレームワーク
       - LINE BOTとの通信を行うための@line/bot-sdkをインポート
       - line-bot-sdkに必要な値(access_token, channel_secret)を設定し、クライアントを立ち上げる
       - line-bot-sdkが提供する関数によって、replyやsend、multicastといった機能を使う
+      - メソッド
+        - validate_signature: リクエストヘッダのX-Line-Signatureデータを確認し、LINEからの発信なのかどうかを検証する
+        - extract_events: リクエストボディからイベント配列を取得する
+        - extract_message: イベントからメッセージ部分を抽出する
+        - extract_message_text: イベントからメッセージ本文を抽出する
+        - extract_sender_id: イベントからソースID or toIDを抽出し、memory_idとして登録する
+        - identify_event_type: イベントからイベントtypeを抽出する
+        - identify_message_type: イベントからメッセージtypeを抽出する
+        - check_supported_event_type: 使用しているメッセンジャーがサポートしているイベントtypeかどうかを検証する
+    - slack.js
+      - slack BOTとの通信を行うための@slack/clientをインポート
+      - slack-bot-sdkに必要な値(token)を設定し、クライアントを立ち上げる
+      - replyなどでメッセージを送る際には、team_id, channel_id, user_idを指定して、送る場所を決める
+      - メソッドはline.jsと同じ
+    - facebook.js
   - flow
     - flow.js
       - flowディレクトリ配下の各モジュールの親モジュール
@@ -51,8 +68,14 @@ bot-express : bot-expressフレームワーク
     - skillモジュール内におけるmessengerの役割
     - skill内におけるLINE BOT(もしくはfacebook)とのやり取りを行うためのモジュール
   - error
-  - memory
   - memory.js
+    - contextデータをどこ(cacah, mongodb, redis)に格納するのかを決めるモジュール
+    - 誰から発信した情報なのかを見分けるためにmemory_idを設定する
+    - memory_idをkey、contextをvalueとして情報の格納/取得を行う
+  - memory
+    - memory-cache.js
+    - mongodb.js
+    - redis.js
   - nlu
   - nlu.js
   - skill
