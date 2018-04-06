@@ -3,7 +3,7 @@ const express = require('express');
 const bodyparser = require('body-parser');
 const app = express();
 const { WebClient } = require('@slack/client');
-const token = 'xoxb-274829026134-tsZKSRU7Lwx75cjTo0sGnIUc';
+const token = process.env.SLACK_ACCESS_TOKEN || "undefined";
 const web = new WebClient(token);
 
 app.use(bodyparser.json({
